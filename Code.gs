@@ -1,3 +1,4 @@
+//Main function to calculate the expense till date for the current month and to send it as a report in an email. The email is currently scheduled to run every sunday 10:30 AM
 function myFunction() {
   var currmonth = getSheet();
   var sheet = SpreadsheetApp.getActive().getSheetByName(currmonth);
@@ -17,6 +18,7 @@ function myFunction() {
   MailApp.sendEmail("sankar.potty@gmail.com","expense report",mailBody,{'htmlBody':mailBody});
 }
 
+//Function to determine the current month and to select the sheet based on that.
 function getSheet()
 {
  var now = new Date()

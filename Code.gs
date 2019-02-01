@@ -95,7 +95,7 @@ function SpendLimit()
   var itemlist = items.getValues();
   
    
-  Logger.log(limitvalues[3][0]);
+  Logger.log(limitvalues[1][1]);
   
   var fooddelivery =0;
   var utility=0;
@@ -134,33 +134,33 @@ function SpendLimit()
   {
    sendAlertNotification(limitvalues[0][0],limitvalues[0][1],fooddelivery);
   }
-  if (utility >=  limitvalues[0][2])
+  if (utility >=  limitvalues[1][1])
   {
-  sendAlertNotification(limitvalues[1][0],limitvalues[0][2],utility);
+  sendAlertNotification(limitvalues[1][0],limitvalues[1][1],utility);
   }
-  if (eatout >= limitvalues[0][3])
+  if (eatout >= limitvalues[2][1])
   {
-  sendAlertNotification(limitvalues[2][0],limitvalues[0][3],eatout);
+  sendAlertNotification(limitvalues[2][0],limitvalues[2][1],eatout);
   }
-  if (grocery >= limitvalues[0][4])
+  if (grocery >= limitvalues[3][1])
   {
-  sendAlertNotification(limitvalues[3][0],limitvalues[0][4],grocery);
+  sendAlertNotification(limitvalues[3][0],limitvalues[3][1],grocery);
   }
-  if (party >= limitvalues[0][5])
+  if (party >= limitvalues[4][1])
   {
-  sendAlertNotification(limitvalues[4][0],limitvalues[0][5],party);
+  sendAlertNotification(limitvalues[4][0],limitvalues[4][1],party);
   }
   
-  sendAlertNotification(limitvalues[0][0],limitvalues[0][1],fooddelivery);
-  sendAlertNotification(limitvalues[1][0],limitvalues[0][2],utility);
+  //sendAlertNotification(limitvalues[0][0],limitvalues[0][1],fooddelivery);
+  sendAlertNotification(limitvalues[1][0],limitvalues[1][1],utility);
 }
 
 function sendAlertNotification(type,limit,currentspends)
 {
 
-  var mailBody = "Hello Sankar, <br/><br/>You have crossed the limit of current month expense for the expense type: "+type;
-  mailBody = mailBody+ "<br/>Current Spends: "+currentspends;
-  mailBody = mailBody+"<br/>Monthly Limits: "+limit;
+  var mailBody = "Hello Sankar, <br/><br/>You have crossed the current month expense limit for "+type;
+  mailBody = mailBody+ "<br/><br/>Current Spends: "+currentspends;
+  mailBody = mailBody+"<br/><br/>Monthly Limits: "+limit;
   //MailApp.sendEmail("sankar.potty@gmail.com","expense report", "your expense till date for the month of "+currmonth+ " is " + sum + " Rs.");
   MailApp.sendEmail("sankar.potty@gmail.com","Alert! Expense threshold reached for "+type,mailBody,{'htmlBody':mailBody});
 }

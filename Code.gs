@@ -12,10 +12,11 @@ function myFunction() {
   }
   var url = SpreadsheetApp.getActive().getUrl();
   //Logger.log(url);
-  var mailBody = "Hello Sankar, Your expense till date for the month of " +currmonth+ " is " + sum+" Rs.>";
+  var mailBody = "Hello Sankar, <br/><br/>Your expense till date for the month of " +currmonth+ " is " + sum+" Rs.";
   mailBody = mailBody+ "<br/>Please find the detailed report here <a href = \""+url+"\">Click here</a>";
+  mailBody = mailBody+"<br/><br/>Regards,<br/>Google";
   //MailApp.sendEmail("sankar.potty@gmail.com","expense report", "your expense till date for the month of "+currmonth+ " is " + sum + " Rs.");
-  MailApp.sendEmail("sankar.potty@gmail.com","expense report",mailBody,{'htmlBody':mailBody});
+  MailApp.sendEmail("sankar.potty@gmail.com","Expense Report",mailBody,{'htmlBody':mailBody});
 }
 
 //Function to determine the current month and to select the sheet based on that.
@@ -76,4 +77,90 @@ function getSheet()
 
  //Logger.log("current month is" + month);
  return activesheet;
+}
+
+function SpendLimit()
+{
+  var currmonth = getSheet();
+  var sheet = SpreadsheetApp.getActive().getSheetByName(currmonth);
+  var range = sheet.getRange("A2:C100");
+  var data = range.getValues();
+  
+  var limitsheet = SpreadsheetApp.getActive().getSheetByName('Limits');
+  var limit = limitsheet.getRange("A2:B10");
+  var limitvalues = limit.getValues();
+  //Logger.log(limitvalues[0][1]);
+  
+  var items = limitsheet.getRange("F1:P10");
+  var itemlist = items.getValues();
+  
+   
+  Logger.log(limitvalues[3][0]);
+  
+  var fooddelivery =0;
+  var utility=0;
+  var grocery =0;
+  var party=0;
+  var eatout=0;
+  
+  for (i in data)
+  {
+    var row = data[i];
+   
+   if (row[2]!='' && itemlist[0].indexOf(row[2])>=0)
+    {
+     fooddelivery = fooddelivery+row[1];
+    }
+   else if (row[2]!= '' && itemlist[1].indexOf(row[2])>=0)
+    {
+      utility=utility+row[1];
+      
+    }
+        else if (row[2]!='' && itemlist[2].indexOf(row[2])>=0)
+    {
+     eatout = eatout+row[1];
+    }
+     else if (row[2]!='' && itemlist[3]>=0)
+    {
+     grocery = grocery+row[1];
+    }
+     else if (row[2]!='' && itemlist[4]>=0)
+    {
+     party = party+row[1];
+    }
+  
+  }
+  if (fooddelivery >= limitvalues[0][1])
+  {
+   sendAlertNotification(limitvalues[0][0],limitvalues[0][1],fooddelivery);
+  }
+  if (utility >=  limitvalues[0][2])
+  {
+  sendAlertNotification(limitvalues[1][0],limitvalues[0][2],utility);
+  }
+  if (eatout >= limitvalues[0][3])
+  {
+  sendAlertNotification(limitvalues[2][0],limitvalues[0][3],eatout);
+  }
+  if (grocery >= limitvalues[0][4])
+  {
+  sendAlertNotification(limitvalues[3][0],limitvalues[0][4],grocery);
+  }
+  if (party >= limitvalues[0][5])
+  {
+  sendAlertNotification(limitvalues[4][0],limitvalues[0][5],party);
+  }
+  
+  sendAlertNotification(limitvalues[0][0],limitvalues[0][1],fooddelivery);
+  sendAlertNotification(limitvalues[1][0],limitvalues[0][2],utility);
+}
+
+function sendAlertNotification(type,limit,currentspends)
+{
+
+  var mailBody = "Hello Sankar, <br/><br/>You have crossed the limit of current month expense for the expense type: "+type;
+  mailBody = mailBody+ "<br/>Current Spends: "+currentspends;
+  mailBody = mailBody+"<br/>Monthly Limits: "+limit;
+  //MailApp.sendEmail("sankar.potty@gmail.com","expense report", "your expense till date for the month of "+currmonth+ " is " + sum + " Rs.");
+  MailApp.sendEmail("sankar.potty@gmail.com","Alert! Expense threshold reached for "+type,mailBody,{'htmlBody':mailBody});
 }

@@ -79,7 +79,12 @@ function getSheet()
  return activesheet;
 }
 
-function SpendLimit()
+function DailyReport()
+{
+ var ret = SpendLimit(true);
+}
+
+function SpendLimit(dailyreport)
 {
   var currmonth = getSheet();
   var sheet = SpreadsheetApp.getActive().getSheetByName(currmonth);
@@ -95,13 +100,14 @@ function SpendLimit()
   var itemlist = items.getValues();
   
    
-  Logger.log(limitvalues[1][1]);
+  //Logger.log(limitvalues[1][1]);
   
   var fooddelivery =0;
   var utility=0;
   var grocery =0;
   var party=0;
   var eatout=0;
+  var others=0;
   
   for (i in data)
   {
@@ -120,17 +126,26 @@ function SpendLimit()
     {
      eatout = eatout+row[1];
     }
-     else if (row[2]!='' && itemlist[3]>=0)
+     else if (row[2]!='' && itemlist[3].indexOf(row[2])>=0)
     {
      grocery = grocery+row[1];
     }
-     else if (row[2]!='' && itemlist[4]>=0)
+     else if (row[2]!='' && itemlist[4].indexOf(row[2])>=0)
     {
      party = party+row[1];
     }
+    else if (row[2]!='' && itemlist[5].indexOf(row[2])>=0)
+    {
+     others = others+row[1];
+    }
   
   }
-  if (fooddelivery >= limitvalues[0][1])
+  
+  if (dailyreport == true)
+  {
+    var reportresult = generateReport(fooddelivery,utility,eatout,grocery,party,others);
+  }
+  else if (fooddelivery >= limitvalues[0][1])
   {
    sendAlertNotification(limitvalues[0][0],limitvalues[0][1],fooddelivery);
   }
@@ -150,9 +165,13 @@ function SpendLimit()
   {
   sendAlertNotification(limitvalues[4][0],limitvalues[4][1],party);
   }
+  if (others >= limitvalues[5][1])
+  {
+  sendAlertNotification(limitvalues[5][0],limitvalues[5][1],others);
+  }
   
   //sendAlertNotification(limitvalues[0][0],limitvalues[0][1],fooddelivery);
-  sendAlertNotification(limitvalues[1][0],limitvalues[1][1],utility);
+  //sendAlertNotification(limitvalues[1][0],limitvalues[1][1],utility);
 }
 
 function sendAlertNotification(type,limit,currentspends)
@@ -161,6 +180,34 @@ function sendAlertNotification(type,limit,currentspends)
   var mailBody = "Hello Sankar, <br/><br/>You have crossed the current month expense limit for "+type;
   mailBody = mailBody+ "<br/><br/>Current Spends: "+currentspends;
   mailBody = mailBody+"<br/><br/>Monthly Limits: "+limit;
+  mailBody = mailBody+"<br/><br/>Regards,<br/>Google";
   //MailApp.sendEmail("sankar.potty@gmail.com","expense report", "your expense till date for the month of "+currmonth+ " is " + sum + " Rs.");
   MailApp.sendEmail("sankar.potty@gmail.com","Alert! Expense threshold reached for "+type,mailBody,{'htmlBody':mailBody});
+}
+
+function generateReport(Fd,Uy,Eo,Gr,Py,Ot)
+{
+  var tableheader = getTableStyle();
+  var total = Fd+Uy+Eo+Gr+Py+Ot;
+  var mailBody = tableheader+ "<body>Hello Sankar, <br/><br/>Please find your daily expense report below";
+  mailBody = mailBody+ "<br/><br/>";
+  mailBody = mailBody + "<table><tr><th id=\"th01\"><b>Expense Type</b></th><th id=\"th01\"><b>Total Spend</b></th></tr>";
+  mailBody = mailBody + "<tr id=\"tr01\"><td>Food Delivery</td><td>"+Fd+"</td></tr>";
+  mailBody = mailBody + "<tr><td>Utility</td><td>"+Uy+"</td></tr>";
+  mailBody = mailBody + "<tr id=\"tr01\"><td>Eat Out</td><td>"+Eo+"</td></tr>";
+  mailBody = mailBody + "<tr><td>Grocery</td><td>"+Gr+"</td></tr>";
+  mailBody = mailBody + "<tr id=\"tr01\"><td>Party</td><td>"+Py+"</td></tr>";
+  mailBody = mailBody + "<tr><td>Others</td><td>"+Ot+"</td></tr>";
+  mailBody = mailBody + "<tr id=\"tr01\"><td><b>Total</b></td><td><b>"+total+"</b></td></tr></table>"
+  mailBody = mailBody+"<br/><br/>Regards,<br/>Google</body>";
+ 
+ MailApp.sendEmail("sankar.potty@gmail.com","Daily Expense Report ",mailBody,{'htmlBody':mailBody});
+}
+
+function getTableStyle()
+{
+var TbStyle = "<head><style>table {font-family: arial, sans-serif;border-collapse: collapse;width: 50%;}"
+TbStyle = TbStyle+"td, th {border: 2px solid #dddddd;text-align: left;padding: 8px} tr#tr01{background-color: #f1f1c1;} th#th01{background-color:#aedeff;}</style></head>";
+
+return TbStyle;
 }
